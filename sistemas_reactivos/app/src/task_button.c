@@ -69,7 +69,7 @@ void task_button(void* argument)
   while(true)
   {
     GPIO_PinState button_state;
-    button_state = HAL_GPIO_ReadPin(BTN_PORT, BTN_PIN);
+    button_state = !HAL_GPIO_ReadPin(BTN_PORT, BTN_PIN);
 
     led_message_t msg;
     if (GPIO_PIN_SET == button_state)
