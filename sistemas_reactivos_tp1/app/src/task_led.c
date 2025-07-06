@@ -44,24 +44,31 @@
 #include "logger.h"
 #include "dwt.h"
 
+#include "task_led.h"
+
 /********************** macros and definitions *******************************/
 
-#define TASK_PERIOD_MS_           (1000)
+#define TASK_PERIOD_MS_			(1000)
+
+#define QUEUE_LENGTH_			(1)
+#define QUEUE_ITEM_SIZE_		(sizeof(ao_led_message_t))
 
 /********************** internal data declaration ****************************/
+
+
 
 /********************** internal functions declaration ***********************/
 
 /********************** internal data definition *****************************/
 
-typedef enum
-{
-  LED_COLOR_NONE,
-  LED_COLOR_RED,
-  LED_COLOR_GREEN,
-  LED_COLOR_BLUE,
-  LED_COLOR_WHITE,
-  LED_COLOR__N,
+typedef enum {
+
+	LED_COLOR_NONE,
+	LED_COLOR_RED,
+	LED_COLOR_GREEN,
+	LED_COLOR_BLUE,
+	LED_COLOR_WHITE,
+	LED_COLOR__N,
 } led_color_t;
 
 /********************** external data definition *****************************/
@@ -70,57 +77,63 @@ extern SemaphoreHandle_t hsem_led;
 
 /********************** internal functions definition ************************/
 
-void led_set_colors(bool r, bool g, bool b)
-{
-  HAL_GPIO_WritePin(LED_RED_PORT, LED_RED_PIN, r ? GPIO_PIN_SET: GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(LED_GREEN_PORT, LED_GREEN_PIN, g ? GPIO_PIN_SET: GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(LED_BLUE_PORT, LED_BLUE_PIN, b ? GPIO_PIN_SET: GPIO_PIN_RESET);
+void led_set_colors(bool r, bool g, bool b) {
+
+	HAL_GPIO_WritePin(LED_RED_PORT, LED_RED_PIN, r ? GPIO_PIN_RESET: GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LED_GREEN_PORT, LED_GREEN_PIN, g ? GPIO_PIN_RESET: GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LED_BLUE_PORT, LED_BLUE_PIN, b ? GPIO_PIN_RESET: GPIO_PIN_SET);
 }
 
 /********************** external functions definition ************************/
 
-void task_led(void *argument)
-{
-  while (true)
-  {
-    led_color_t color;
+void task_led(void *argument) {
 
-    if(pdTRUE == xSemaphoreTake(hsem_led, 0))
-    {
-      color = LED_COLOR_RED;
-    }
-    else
-    {
-      color = LED_COLOR_NONE;
-    }
+	ao_led_handle_t * hao = (ao_led_handle_t*)argument;
+	hao->hqueue = xQueueCreate(QUEUE_LENGTH_, QUEUE_ITEM_SIZE_);
 
-    switch (color)
-    {
-      case LED_COLOR_NONE:
-        led_set_colors(false, false, false);
-        break;
-      case LED_COLOR_RED:
-        LOGGER_INFO("led red");
-        led_set_colors(true, false, false);
-        break;
-      case LED_COLOR_GREEN:
-        LOGGER_INFO("led green");
-        led_set_colors(false, true, false);
-        break;
-      case LED_COLOR_BLUE:
-        LOGGER_INFO("led blue");
-        led_set_colors(false, false, true);
-        break;
-      case LED_COLOR_WHITE:
-        LOGGER_INFO("led white");
-        led_set_colors(true, true, true);
-        break;
-      default:
-        break;
-    }
+	while (true) {
 
-    vTaskDelay((TickType_t)(TASK_PERIOD_MS_ / portTICK_PERIOD_MS));
-  }
+		led_color_t color;
+
+		if(pdTRUE == xSemaphoreTake(hsem_led, 0)) {
+
+			color = LED_COLOR_RED;
+		} else {
+
+			color = LED_COLOR_NONE;
+		}
+
+		switch (color) {
+
+			case LED_COLOR_NONE:
+				led_set_colors(false, false, false);
+				break;
+			case LED_COLOR_RED:
+				LOGGER_INFO("led red");
+				led_set_colors(true, false, false);
+				break;
+			case LED_COLOR_GREEN:
+				LOGGER_INFO("led green");
+				led_set_colors(false, true, false);
+				break;
+			case LED_COLOR_BLUE:
+				LOGGER_INFO("led blue");
+				led_set_colors(false, false, true);
+				break;
+			case LED_COLOR_WHITE:
+				LOGGER_INFO("led white");
+				led_set_colors(true, true, true);
+				break;
+			default:
+				break;
+		}
+		vTaskDelay((TickType_t)(TASK_PERIOD_MS_ / portTICK_PERIOD_MS));
+	}
+}
+
+bool ao_led_send(ao_led_handle_t* hao, ao_led_message_t* msg) {
+
+	return (pdPASS == xQueueSend(hao->hqueue, (void*)msg, 0));
 }
 
 /********************** end of file ******************************************/

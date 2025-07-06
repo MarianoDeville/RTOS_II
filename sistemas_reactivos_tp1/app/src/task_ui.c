@@ -57,6 +57,8 @@
 
 /********************** internal data definition *****************************/
 
+static QueueHandle_t hao_hqueue;
+
 /********************** external data definition *****************************/
 
 extern SemaphoreHandle_t hsem_button;
@@ -66,16 +68,47 @@ extern SemaphoreHandle_t hsem_led;
 
 /********************** external functions definition ************************/
 
-void task_ui(void *argument)
-{
-  while (true)
-  {
-    if(pdTRUE == xSemaphoreTake(hsem_button, portMAX_DELAY))
-    {
-      LOGGER_INFO("ui led activate");
-      xSemaphoreGive(hsem_led);
-    }
-  }
+void task_ui(void *argument) {
+
+	hao_hqueue = xQueueCreate(QUEUE_LENGTH_, QUEUE_ITEM_SIZE_);
+	while(NULL == hao_hqueue) { }
+
+	while (true) {
+
+		if(pdTRUE == xSemaphoreTake(hsem_button, portMAX_DELAY)) {
+
+			msg_event_t event_msg;
+
+			if (pdPASS == xQueueReceive(hao_hqueue, &event_msg, portMAX_DELAY)) {
+
+				switch (event_msg) {
+
+					case MSG_EVENT_BUTTON_PULSE:
+						LOGGER_INFO("led red");
+
+						break;
+					case MSG_EVENT_BUTTON_SHORT:
+						LOGGER_INFO("led green");
+
+						break;
+					case MSG_EVENT_BUTTON_LONG:
+						LOGGER_INFO("led blue");
+
+						break;
+					default:
+						break;
+				}
+			}
+			LOGGER_INFO("ui led activate");
+			xSemaphoreGive(hsem_led);
+		}
+	}
+}
+
+
+bool ao_ui_send_event(msg_event_t msg) {
+
+	return (pdPASS == xQueueSend(hao_hqueue, (void*)&msg, 0));
 }
 
 /********************** end of file ******************************************/

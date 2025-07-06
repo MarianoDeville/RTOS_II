@@ -46,6 +46,37 @@ extern "C" {
 
 /********************** typedef **********************************************/
 
+typedef enum
+{
+  AO_LED_MESSAGE_ON,
+  AO_LED_MESSAGE_OFF,
+  AO_LED_MESSAGE_BLINK,
+  AO_LED_MESSAGE__N,
+} ao_led_action_t;
+
+typedef void (*ao_led_cb_t)(int);
+
+typedef struct
+{
+    int id;
+    ao_led_cb_t callback;
+    ao_led_action_t action;
+    int value;
+} ao_led_message_t;
+
+typedef enum
+{
+  AO_LED_COLOR_RED,
+  AO_LED_COLOR_GREEN,
+  AO_LED_COLOR_BLUE,
+} ao_led_color;
+
+typedef struct
+{
+    ao_led_color color;
+    QueueHandle_t hqueue;
+} ao_led_handle_t;
+
 /********************** external data declaration ****************************/
 
 /********************** external functions declaration ***********************/
