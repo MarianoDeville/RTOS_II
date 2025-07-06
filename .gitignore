@@ -50,3 +50,5 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+sistemas_reactivos_tp1/Debug/sistemas_reactivos_tp1.list
+*.cyclo

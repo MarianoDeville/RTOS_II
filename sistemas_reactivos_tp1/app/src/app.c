@@ -78,7 +78,7 @@ void app_init(void) {
 	while (pdPASS != status) { }
 
 	led_red.color = AO_LED_COLOR_RED;
-	status = xTaskCreate(task_led, "task_led", 128, (void* const) led_red, tskIDLE_PRIORITY, NULL);
+	status = xTaskCreate(task_led, "task_led", 128, (void*) &led_red, tskIDLE_PRIORITY, NULL);
 	while (pdPASS != status) { }
 
 

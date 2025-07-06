@@ -133,7 +133,7 @@ void task_led(void *argument) {
 
 bool ao_led_send(ao_led_handle_t* hao, ao_led_action_t* msg) {
 
-	return (pdPASS == xQueueSend(hao->hqueue, (void*)msg, 0));
+	return (pdPASS == xQueueSend(hao->hqueue, &msg, 0));
 }
 
 /********************** end of file ******************************************/

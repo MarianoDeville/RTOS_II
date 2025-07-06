@@ -13943,12 +13943,12 @@ void app_init(void) {
  80051ca:	4b35      	ldr	r3, [pc, #212]	@ (80052a0 <app_init+0x14c>)
  80051cc:	2200      	movs	r2, #0
  80051ce:	701a      	strb	r2, [r3, #0]
-	status = xTaskCreate(task_led, "task_led", 128, NULL, tskIDLE_PRIORITY, NULL);
+	status = xTaskCreate(task_led, "task_led", 128, (void*) &led_red, tskIDLE_PRIORITY, NULL);
  80051d0:	2300      	movs	r3, #0
  80051d2:	9301      	str	r3, [sp, #4]
  80051d4:	2300      	movs	r3, #0
  80051d6:	9300      	str	r3, [sp, #0]
- 80051d8:	2300      	movs	r3, #0
+ 80051d8:	4b31      	ldr	r3, [pc, #196]	@ (80052a0 <app_init+0x14c>)
  80051da:	2280      	movs	r2, #128	@ 0x80
  80051dc:	4931      	ldr	r1, [pc, #196]	@ (80052a4 <app_init+0x150>)
  80051de:	4832      	ldr	r0, [pc, #200]	@ (80052a8 <app_init+0x154>)
@@ -14835,12 +14835,12 @@ bool ao_led_send(ao_led_handle_t* hao, ao_led_action_t* msg) {
  80058fa:	6078      	str	r0, [r7, #4]
  80058fc:	6039      	str	r1, [r7, #0]
 
-	return (pdPASS == xQueueSend(hao->hqueue, (void*)msg, 0));
+	return (pdPASS == xQueueSend(hao->hqueue, &msg, 0));
  80058fe:	687b      	ldr	r3, [r7, #4]
  8005900:	6858      	ldr	r0, [r3, #4]
- 8005902:	2300      	movs	r3, #0
- 8005904:	2200      	movs	r2, #0
- 8005906:	6839      	ldr	r1, [r7, #0]
+ 8005902:	4639      	mov	r1, r7
+ 8005904:	2300      	movs	r3, #0
+ 8005906:	2200      	movs	r2, #0
  8005908:	f7fd fbd8 	bl	80030bc <xQueueGenericSend>
  800590c:	4603      	mov	r3, r0
  800590e:	2b01      	cmp	r3, #1
@@ -14848,6 +14848,11 @@ bool ao_led_send(ao_led_handle_t* hao, ao_led_action_t* msg) {
  8005912:	2301      	moveq	r3, #1
  8005914:	2300      	movne	r3, #0
  8005916:	b2db      	uxtb	r3, r3
+	if(hao->color == AO_LED_COLOR_RED)
+		LOGGER_INFO("rojaso");
+	if(msg == AO_LED_MESSAGE_ON)
+		LOGGER_INFO("onaso");
+
 }
  8005918:	4618      	mov	r0, r3
  800591a:	3708      	adds	r7, #8
