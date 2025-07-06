@@ -50,12 +50,10 @@
 
 #define TASK_PERIOD_MS_			(1000)
 
-#define QUEUE_LENGTH_			(1)
-#define QUEUE_ITEM_SIZE_		(sizeof(ao_led_message_t))
+#define QUEUE_LED_LENGTH_			(1)
+#define QUEUE_LED_ITEM_SIZE_		(sizeof(ao_led_action_t))
 
 /********************** internal data declaration ****************************/
-
-
 
 /********************** internal functions declaration ***********************/
 
@@ -89,7 +87,9 @@ void led_set_colors(bool r, bool g, bool b) {
 void task_led(void *argument) {
 
 	ao_led_handle_t * hao = (ao_led_handle_t*)argument;
-	hao->hqueue = xQueueCreate(QUEUE_LENGTH_, QUEUE_ITEM_SIZE_);
+	hao->hqueue = xQueueCreate(QUEUE_LED_LENGTH_, QUEUE_LED_ITEM_SIZE_);
+	while(NULL == hao->hqueue) { }
+
 
 	while (true) {
 
@@ -131,7 +131,7 @@ void task_led(void *argument) {
 	}
 }
 
-bool ao_led_send(ao_led_handle_t* hao, ao_led_message_t* msg) {
+bool ao_led_send(ao_led_handle_t* hao, ao_led_action_t* msg) {
 
 	return (pdPASS == xQueueSend(hao->hqueue, (void*)msg, 0));
 }

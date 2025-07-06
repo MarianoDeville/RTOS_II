@@ -64,6 +64,10 @@ static QueueHandle_t hao_hqueue;
 extern SemaphoreHandle_t hsem_button;
 extern SemaphoreHandle_t hsem_led;
 
+extern ao_led_handle_t led_red;
+extern ao_led_handle_t led_green;
+extern ao_led_handle_t led_blue;
+
 /********************** internal functions definition ************************/
 
 /********************** external functions definition ************************/
@@ -85,7 +89,7 @@ void task_ui(void *argument) {
 
 					case MSG_EVENT_BUTTON_PULSE:
 						LOGGER_INFO("led red");
-
+						ao_led_send(&led_red, AO_LED_MESSAGE_ON);
 						break;
 					case MSG_EVENT_BUTTON_SHORT:
 						LOGGER_INFO("led green");
