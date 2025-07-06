@@ -72,47 +72,52 @@ extern ao_led_handle_t led_blue;
 
 /********************** external functions definition ************************/
 
-void task_ui(void *argument) {
-
+void task_ui(void *argument)
+{
+	// esta parte no iria en la task del OA sino en su funcion init
 	hao_hqueue = xQueueCreate(QUEUE_LENGTH_, QUEUE_ITEM_SIZE_);
-	while(NULL == hao_hqueue) { }
-
-	while (true) {
-
-		if(pdTRUE == xSemaphoreTake(hsem_button, portMAX_DELAY)) {
-
-			msg_event_t event_msg;
-
-			if (pdPASS == xQueueReceive(hao_hqueue, &event_msg, portMAX_DELAY)) {
-
-				switch (event_msg) {
-
-					case MSG_EVENT_BUTTON_PULSE:
-						LOGGER_INFO("led red");
-						ao_led_send(&led_red, AO_LED_MESSAGE_ON);
-						break;
-					case MSG_EVENT_BUTTON_SHORT:
-						LOGGER_INFO("led green");
-
-						break;
-					case MSG_EVENT_BUTTON_LONG:
-						LOGGER_INFO("led blue");
-
-						break;
-					default:
-						break;
-				}
-			}
-			LOGGER_INFO("ui led activate");
-			xSemaphoreGive(hsem_led);
-		}
+	while(NULL == hao_hqueue)
+	{
+	// error
 	}
+
+  while (true)
+  {
+	  msg_event_t event_msg;
+	  if (pdPASS == xQueueReceive(hao_hqueue, &event_msg, portMAX_DELAY)) {
+
+			switch (event_msg)
+			{
+				case MSG_EVENT_BUTTON_PULSE:
+					LOGGER_INFO("[UI] led red %d", AO_LED_MESSAGE_ON);
+					ao_led_send(&led_red, AO_LED_MESSAGE_ON);
+					break;
+				case MSG_EVENT_BUTTON_SHORT:
+					LOGGER_INFO("[UI] led green");
+					ao_led_send(&led_green, AO_LED_MESSAGE_ON);
+					break;
+				case MSG_EVENT_BUTTON_LONG:
+					LOGGER_INFO("[UI] led blue");
+					ao_led_send(&led_blue, AO_LED_MESSAGE_ON);
+					break;
+				default:
+					break;
+			}
+		}
+		LOGGER_INFO("[UI] led activate");
+  }
 }
 
 
 bool ao_ui_send_event(msg_event_t msg) {
 
-	return (pdPASS == xQueueSend(hao_hqueue, (void*)&msg, 0));
+	BaseType_t status = xQueueSend(hao_hqueue, &msg, 0);
+	if (status != pdPASS){
+		LOGGER_INFO("[UI] Cola llena: evento %d perdido", msg);
+	} else {
+		LOGGER_INFO("[UI] Evento enviado: %d", msg);
+	}
+	return (status == pdPASS);
 }
 
 /********************** end of file ******************************************/

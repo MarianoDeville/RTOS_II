@@ -50,94 +50,178 @@ extern "C" {
 #define NUCLEO_F401RE		(1)
 #define NUCLEO_F446RE		(2)
 #define NUCLEO_F429ZI		(3)
-#define NUCLEO_F413ZH		(4)
-#define STM32F429I_DISCO1	(5)
+#define NUCLEO_F439ZI		(4)
+#define NUCLEO_F413ZH		(5)
+#define STM32F429I_DISC1	(6)
+#define STM32F407G_DISC1	(7)
 
-#define BOARD (NUCLEO_F446RE)
+
+/* ToDo: Elegir a continuacion una configuracion para la compilaciOn: */
+#define GRUPO2_JEZ /* DESCOMENTAR ESTA LINEA PARA USAR CONFIGURACION DE JEZABEL; COMENTAR LOS OTROS DOS DEFINE (MAR y VIC) */
+//#define GRUPO2_MAR /* DESCOMENTAR ESTA LINEA PARA USAR CONFIGURACION DE MARIANO; COMENTAR LOS OTROS DOS DEFINE (JEZ y VIC) */
+//#define GRUPO2_VIC /* DESCOMENTAR ESTA LINEA PARA USAR CONFIGURACION DE VICTOR;  COMENTAR LOS OTROS DOS DEFINE (JEZ y MAR) */
+
+
+#ifdef GRUPO2_JEZ
+	/* Aca van los defines que activa Jezabel para su configuracion: */
+	#define BOARD (NUCLEO_F446RE)
+	#define BOTONERA	/* tomar los pines de la botonera */
+
+#elif defined(GRUPO2_MAR)
+	/* Aca van los defines que activa Mariano para su configuracion: */
+	#define BOARD (NUCLEO_F446RE)
+
+#elif defined(GRUPO2_VIC)
+	/* Aca van los defines que activa Victor para su configuracion: */
+	#define BOARD (STM32F407G_DISC1)
+
+#endif
+
 
 /* STM32 Nucleo Boards - 64 Pins */
 #if ((BOARD == NUCLEO_F103RC) || (BOARD == NUCLEO_F401RE) || (BOARD == NUCLEO_F446RE))
 
-#define BUTTON_A_PIN	EXT_BTN_1_Pin
-#define BUTTON_A_PORT	EXT_BTN_1_GPIO_Port
-#define BUTTON_B_PIN	EXT_BTN_2_Pin
-#define BUTTON_B_PORT	EXT_BTN_2_GPIO_Port
-#define BUTTON_C_PIN	EXT_BTN_2_Pin
-#define BUTTON_C_PORT	EXT_BTN_3_GPIO_Port
+# ifndef BOTONERA
+	#define BTN_A_PIN	B1_Pin
+	#define BTN_A_PORT	B1_GPIO_Port
+	#define BTN_B_PIN	B1_Pin
+	#define BTN_B_PORT	B1_GPIO_Port
+	#define BTN_C_PIN	B1_Pin
+	#define BTN_C_PORT	B1_GPIO_Port
+#endif /* not BOTONERA */
 
-#define BUTTON_PRESSED	GPIO_PIN_RESET
-#define BUTTON_HOVER	GPIO_PIN_SET
+#define BTN_PRESSED	GPIO_PIN_RESET
+#define BTN_HOVER	GPIO_PIN_SET
 
-#define LED_A_PIN	EXT_LED_1_Pin
-#define LED_A_PORT	EXT_LED_1_GPIO_Port
-#define LED_B_PIN	EXT_LED_2_Pin
-#define LED_B_PORT	EXT_LED_2_GPIO_Port
-#define LED_C_PIN	EXT_LED_3_Pin
-#define LED_C_PORT	EXT_LED_3_GPIO_Port
 
-#define LED_ON			GPIO_PIN_SET
-#define LED_OFF			GPIO_PIN_RESET
+# ifndef BOTONERA
+	#define LED_A_PIN	LD2_Pin
+	#define LED_A_PORT	LD2_GPIO_Port
+	#define LED_B_PIN	LD2_Pin
+	#define LED_B_PORT	LD2_GPIO_Port
+	#define LED_C_PIN	LD2_Pin
+	#define LED_C_PORT	LD2_GPIO_Port
+#endif /* not BOTONERA */
+
+#define LED_ON		GPIO_PIN_SET
+#define LED_OFF		GPIO_PIN_RESET
+
+
+# ifdef BOTONERA
+	// pines y leds de la botonera
+	#define LED_A_PIN	LD1_Pin
+	#define LED_B_PIN	LD2_Pin
+	#define LED_C_PIN	LD3_Pin
+	#define LED_A_PORT	LD1_GPIO_Port
+	#define LED_B_PORT	LD2_GPIO_Port
+	#define LED_C_PORT	LD3_GPIO_Port
+
+	#define LED_RED_PIN		LD1_Pin
+	#define LED_BLUE_PIN	LD2_Pin
+	#define LED_GREEN_PIN	LD3_Pin
+	#define LED_RED_PORT	LD1_GPIO_Port
+	#define LED_BLUE_PORT	LD2_GPIO_Port
+	#define LED_GREEN_PORT	LD3_GPIO_Port
+
+	#define BTN_PIN		B1_Pin
+	#define BTN_PORT	B1_GPIO_Port
+
+	#define BTN_A_PIN	BT1_Pin
+	#define BTN_B_PIN	BT2_Pin
+	#define BTN_C_PIN	BT3_Pin
+	#define BTN_A_PORT	BT1_GPIO_Port
+	#define BTN_B_PORT	BT2_GPIO_Port
+	#define BTN_C_PORT	BT3_GPIO_Port
+#endif /* BOTONERA */
 
 #endif/* STM32 Nucleo Boards - 144 Pins */
 
-#if ((BOARD == NUCLEO_F429ZI) || (BOARD == NUCLEO_F413ZH))
+#if ((BOARD == NUCLEO_F429ZI) || (BOARD == NUCLEO_F439ZI) || (BOARD == NUCLEO_F413ZH))
 
-#define BUTTON_A_PIN	USER_Btn_Pin
-#define BUTTON_A_PORT	USER_Btn_GPIO_Port
-#define BUTTON_B_PIN	USER_Btn_Pin
-#define BUTTON_B_PORT	USER_Btn_GPIO_Port
-#define BUTTON_C_PIN	USER_Btn_Pin
-#define BUTTON_C_PORT	USER_Btn_GPIO_Port
+#define BTN_A_PIN	USER_Btn_Pin
+#define BTN_A_PORT	USER_Btn_GPIO_Port
+#define BTN_B_PIN	USER_Btn_Pin
+#define BTN_B_PORT	USER_Btn_GPIO_Port
+#define BTN_C_PIN	USER_Btn_Pin
+#define BTN_C_PORT	USER_Btn_GPIO_Port
 
-#define BUTTON_PRESSED	GPIO_PIN_SET
-#define BUTTON_HOVER	GPIO_PIN_RESET
+#define BTN_PRESSED	GPIO_PIN_SET
+#define BTN_HOVER	GPIO_PIN_RESET
 
-#define LED_A_PIN		LD1_Pin
-#define LED_A_PORT		LD1_GPIO_Port
-#define LED_B_PIN		LD2_Pin
-#define LED_B_PORT		LD2_GPIO_Port
-#define LED_C_PIN		LD3_Pin
-#define LED_C_PORT		LD3_GPIO_Port
+#define LED_A_PIN	LD1_Pin
+#define LED_A_PORT	LD1_GPIO_Port
+#define LED_B_PIN	LD2_Pin
+#define LED_B_PORT	LD2_GPIO_Port
+#define LED_C_PIN	LD3_Pin
+#define LED_C_PORT	LD3_GPIO_Port
 
-#define LED_ON			GPIO_PIN_SET
-#define LED_OFF			GPIO_PIN_RESET
+#define LED_ON		GPIO_PIN_SET
+#define LED_OFF		GPIO_PIN_RESET
 
 #endif
 
 /* STM32 Discovery Kits */
-#if (BOARD == STM32F429I_DISCO1)
+#if (BOARD == STM32F429I_DISC1)
 
-#define BUTTON_A_PIN	B1_Pin
-#define BUTTON_A_PORT	B1_GPIO_Port
-#define BUTTON_B_PIN	B2_Pin
-#define BUTTON_B_PORT	B2_GPIO_Port
-#define BUTTON_C_PIN	B3_Pin
-#define BUTTON_C_PORT	B3_GPIO_Port
+#define BTN_A_PIN	B1_Pin
+#define BTN_A_PORT	B1_GPIO_Port
+#define BTN_B_PIN	B1_Pin
+#define BTN_B_PORT	B1_GPIO_Port
+#define BTN_C_PIN	B1_Pin
+#define BTN_C_PORT	B1_GPIO_Port
 
-#define BUTTON_PRESSED	GPIO_PIN_SET
-#define BUTTON_HOVER	GPIO_PIN_RESET
+#define BTN_PRESSED	GPIO_PIN_SET
+#define BTN_HOVER	GPIO_PIN_RESET
 
-#define LED_A_PIN		LD3_Pin
-#define LED_A_PORT		LD3_GPIO_Port
-#define LED_B_PIN		LD4_Pin
-#define LED_B_PORT		LD4_GPIO_Port
-#define LED_C_PIN		LD4_Pin
-#define LED_C_PORT		LD4_GPIO_Port
+#define LED_A_PIN	LD3_Pin
+#define LED_A_PORT	LD3_GPIO_Port
+#define LED_B_PIN	LD4_Pin
+#define LED_B_PORT	LD4_GPIO_Port
+#define LED_C_PIN	LD4_Pin
+#define LED_C_PORT	LD4_GPIO_Port
 
-#define LED_ON			GPIO_PIN_SET
-#define LED_OFF			GPIO_PIN_RESET
+#define LED_ON		GPIO_PIN_SET
+#define LED_OFF		GPIO_PIN_RESET
 
 #endif
 
-#define BUTTON_PIN      BUTTON_A_PIN
-#define BUTTON_PORT     BUTTON_A_PORT
+/* STM32 Discovery Kits */
+#if (BOARD == STM32F407G_DISC1)
 
-#define LED_RED_PIN     LED_C_PIN
-#define LED_RED_PORT    LED_C_PORT
-#define LED_GREEN_PIN   LED_A_PIN
-#define LED_GREEN_PORT  LED_A_PORT
-#define LED_BLUE_PIN    LED_B_PIN
-#define LED_BLUE_PORT   LED_B_PORT
+#define BTN_A_PIN	B1_Pin
+#define BTN_A_PORT	B1_GPIO_Port
+#define BTN_B_PIN	B1_Pin
+#define BTN_B_PORT	B1_GPIO_Port
+#define BTN_C_PIN	B1_Pin
+#define BTN_C_PORT	B1_GPIO_Port
+
+#define BTN_PRESSED	GPIO_PIN_SET
+#define BTN_HOVER	GPIO_PIN_RESET
+
+#define LED_A_PIN	LD3_Pin
+#define LED_A_PORT	LD3_GPIO_Port
+#define LED_B_PIN	LD4_Pin
+#define LED_B_PORT	LD4_GPIO_Port
+#define LED_C_PIN	LD5_Pin
+#define LED_C_PORT	LD5_GPIO_Port
+
+#define LED_ON		GPIO_PIN_SET
+#define LED_OFF		GPIO_PIN_RESET
+
+#endif
+
+#ifndef BOTONERA
+	#define BTN_PIN         BTN_A_PIN
+	#define BTN_PORT        BTN_A_PORT
+
+	#define LED_RED_PIN     LED_C_PIN
+	#define LED_RED_PORT    LED_C_PORT
+	#define LED_GREEN_PIN   LED_A_PIN
+	#define LED_GREEN_PORT  LED_A_PORT
+	#define LED_BLUE_PIN    LED_B_PIN
+	#define LED_BLUE_PORT   LED_B_PORT
+#endif /* not BOTONERA */
+
 
 /********************** typedef **********************************************/
 
