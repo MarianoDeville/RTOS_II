@@ -103,8 +103,9 @@ extern "C" {
 	#define LED_C_PORT	LD2_GPIO_Port
 #endif /* not BOTONERA */
 
-#define LED_ON		GPIO_PIN_SET
-#define LED_OFF		GPIO_PIN_RESET
+// Leds pullup
+#define LED_ON		GPIO_PIN_RESET
+#define LED_OFF		GPIO_PIN_SET
 
 
 # ifdef BOTONERA
