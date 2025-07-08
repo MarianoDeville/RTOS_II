@@ -54,9 +54,7 @@
 #define QUEUE_LED_ITEM_SIZE_	(sizeof(ao_led_action_t))
 
 /********************** internal data declaration ****************************/
-
 /********************** internal functions declaration ***********************/
-
 /********************** internal data definition *****************************/
 
 typedef enum {
