@@ -53,6 +53,12 @@ typedef enum {
 	MSG_EVENT__N,
 } msg_event_t;
 
+typedef struct
+{
+    size_t size;
+    msg_event_t data;
+    bool msg_entregado;
+} msg_t;
 /********************** external data declaration ****************************/
 
 /********************** external functions declaration ***********************/

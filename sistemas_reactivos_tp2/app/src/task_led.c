@@ -88,9 +88,9 @@ static void task_led(void *argument) {
 		}
 		vTaskDelay((TickType_t)(TASK_PERIOD_MS_ / portTICK_PERIOD_MS));
 		HAL_GPIO_WritePin(led_port_[hao->color], led_pin_[hao->color], LED_OFF);
+		ao_led_delete(hao);
 	}
 }
-
 
 void ao_led_init(ao_led_handle_t* hao, ao_led_color color) {
 
@@ -127,7 +127,7 @@ void ao_led_delete(ao_led_handle_t* hao) {
 		hao->hqueue = NULL;
 		LOGGER_INFO("[LED] Cola eliminada: color=%d", hao->color);
 	}
-	LOGGER_INFO("Elimino tarea led");
+	LOGGER_INFO("[LED] Elimino tarea led");
 	vTaskDelete(NULL);
 }
 /********************** end of file ******************************************/

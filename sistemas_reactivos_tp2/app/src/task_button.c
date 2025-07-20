@@ -57,7 +57,7 @@
 /********************** internal functions declaration ***********************/
 /********************** internal data definition *****************************/
 /********************** external data definition *****************************/
-extern SemaphoreHandle_t hsem_button;
+extern QueueHandle_t hqueue;
 
 /********************** internal functions definition ************************/
 typedef enum {
@@ -116,28 +116,54 @@ void task_button(void* argument) {
 		button_type_t button_type;
 		button_type = button_process_state_(button_state);
 
-		switch (button_type) {
+		if(button_type != BUTTON_TYPE_NONE) {
 
-			case BUTTON_TYPE_NONE:
-				break;
-			case BUTTON_TYPE_PULSE:
+			msg_t* pmsg = (msg_t*)pvPortMalloc(sizeof(msg_t));
+
+			if(NULL != pmsg) {
+
+				LOGGER_INFO("Memoria alocada: %d", sizeof(msg_t));
+				pmsg->size = sizeof(msg_t);
+
+				switch (button_type) {
+
+					case BUTTON_TYPE_NONE:
+						break;
+					case BUTTON_TYPE_PULSE:
+						pmsg->data = MSG_EVENT_BUTTON_PULSE;
+						LOGGER_INFO("[BUTTON] button pulse");
+						break;
+					case BUTTON_TYPE_SHORT:
+						pmsg->data = MSG_EVENT_BUTTON_SHORT;
+						LOGGER_INFO("[BUTTON] button short");
+						break;
+					case BUTTON_TYPE_LONG:
+						pmsg->data = MSG_EVENT_BUTTON_LONG;
+						LOGGER_INFO("[BUTTON] button long");
+						break;
+					default:
+						LOGGER_INFO("[BUTTON] button error");
+						break;
+				}
+				pmsg->msg_entregado = false;
+				LOGGER_INFO("[BUTTON] creo tarea UI");
 				ao_ui_init();
-				LOGGER_INFO("button pulse");
-				ao_ui_send_event(MSG_EVENT_BUTTON_PULSE);
-				break;
-			case BUTTON_TYPE_SHORT:
-				ao_ui_init();
-				LOGGER_INFO("button short");
-				ao_ui_send_event(MSG_EVENT_BUTTON_SHORT);
-				break;
-			case BUTTON_TYPE_LONG:
-				ao_ui_init();
-				LOGGER_INFO("button long");
-				ao_ui_send_event(MSG_EVENT_BUTTON_LONG);
-				break;
-			default:
-				LOGGER_INFO("button error");
-				break;
+
+ao_ui_send_event(pmsg->data);
+
+				if(pdPASS == xQueueSend(hqueue, (void*)&pmsg, 0)) {
+
+					LOGGER_INFO("[BUTTON] mensaje enviado");
+				} else {
+
+		            LOGGER_INFO("[BUTTON] mensaje no enviado");
+		            vPortFree((void*)pmsg);
+		            LOGGER_INFO("[BUTTON] memoria liberada desde button");
+				}
+			} else {
+
+				LOGGER_INFO("[BUTTON] memoria insuficiente");
+			}
 		}
 		vTaskDelay((TickType_t)(TASK_PERIOD_MS_ / portTICK_PERIOD_MS));
 	}
