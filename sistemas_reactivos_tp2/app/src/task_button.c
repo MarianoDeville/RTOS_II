@@ -57,8 +57,6 @@
 /********************** internal functions declaration ***********************/
 /********************** internal data definition *****************************/
 /********************** external data definition *****************************/
-extern QueueHandle_t hqueue;
-
 /********************** internal functions definition ************************/
 typedef enum {
 
@@ -116,52 +114,31 @@ void task_button(void* argument) {
 		button_type_t button_type;
 		button_type = button_process_state_(button_state);
 
-		if(button_type != BUTTON_TYPE_NONE) {
-
-			msg_t* pmsg = (msg_t*)pvPortMalloc(sizeof(msg_t));
-
-			if(NULL != pmsg) {
-
-				LOGGER_INFO("Memoria alocada: %d", sizeof(msg_t));
-				pmsg->size = sizeof(msg_t);
-
-				switch (button_type) {
-
-					case BUTTON_TYPE_NONE:
-						break;
-					case BUTTON_TYPE_PULSE:
-						pmsg->data = MSG_EVENT_BUTTON_PULSE;
-						LOGGER_INFO("[BUTTON] button pulse");
-						break;
-					case BUTTON_TYPE_SHORT:
-						pmsg->data = MSG_EVENT_BUTTON_SHORT;
-						LOGGER_INFO("[BUTTON] button short");
-						break;
-					case BUTTON_TYPE_LONG:
-						pmsg->data = MSG_EVENT_BUTTON_LONG;
-						LOGGER_INFO("[BUTTON] button long");
-						break;
-					default:
-						LOGGER_INFO("[BUTTON] button error");
-						break;
-				}
-				pmsg->msg_entregado = false;
+		switch (button_type)
+		{
+			case BUTTON_TYPE_NONE:
+				break;
+			case BUTTON_TYPE_PULSE:
 				LOGGER_INFO("[BUTTON] creo tarea UI");
-				ao_ui_init();
-
-				if(pdPASS == xQueueSend(hqueue, (void*)&pmsg, 0)) {
-
-					LOGGER_INFO("[BUTTON] mensaje enviado");
-				} else {
-
-		            LOGGER_INFO("[BUTTON] mensaje no enviado");
-		            vPortFree((void*)pmsg);
-		            LOGGER_INFO("[BUTTON] memoria liberada desde button");
-				}
-			} else {
-
-				LOGGER_INFO("[BUTTON] memoria insuficiente");
-			}
+								ao_ui_init();
+				LOGGER_INFO("[BTN] pulso enviado");
+				ao_ui_send_event(MSG_EVENT_BUTTON_PULSE);
+				break;
+			case BUTTON_TYPE_SHORT:
+				LOGGER_INFO("[BUTTON] creo tarea UI");
+								ao_ui_init();
+				LOGGER_INFO("[BTN] corto enviado");
+				ao_ui_send_event(MSG_EVENT_BUTTON_SHORT);
+				break;
+			case BUTTON_TYPE_LONG:
+				LOGGER_INFO("[BUTTON] creo tarea UI");
+								ao_ui_init();
+				LOGGER_INFO("[BTN] largo enviado");
+				ao_ui_send_event(MSG_EVENT_BUTTON_LONG);
+				break;
+			default:
+				LOGGER_INFO("[BTN] error");
+				break;
 		}
 		vTaskDelay((TickType_t)(TASK_PERIOD_MS_ / portTICK_PERIOD_MS));
 	}

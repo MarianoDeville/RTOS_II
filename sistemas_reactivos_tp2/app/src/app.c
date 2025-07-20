@@ -59,9 +59,6 @@ void app_init(void)
 
 	BaseType_t status;
 
-	hqueue = xQueueCreate(QUEUE_LENGTH_, QUEUE_ITEM_SIZE_);
-	while(NULL == hqueue) {	}
-
 	status = xTaskCreate(task_button, "task_button", 128, NULL, tskIDLE_PRIORITY, NULL);
 	while (pdPASS != status) { }
 

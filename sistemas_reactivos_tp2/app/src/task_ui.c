@@ -53,8 +53,6 @@
 /********************** internal data declaration ****************************/
 /********************** internal functions declaration ***********************/
 /********************** internal data definition *****************************/
-static QueueHandle_t hao_hqueue;
-
 /********************** external data definition *****************************/
 ao_led_handle_t led_red, led_green, led_blue;
 extern QueueHandle_t hqueue;
@@ -96,8 +94,9 @@ static void task_ui(void *argument) {
 
 void ao_ui_init(void)
 {
-	hao_hqueue = xQueueCreate(QUEUE_LENGTH_, QUEUE_ITEM_SIZE_);
-	while(NULL == hao_hqueue) { }
+
+	hqueue = xQueueCreate(QUEUE_LENGTH_, QUEUE_ITEM_SIZE_);
+	while(NULL == hqueue) {	}
 
 	BaseType_t status;
 	status = xTaskCreate(task_ui, "task_ao_ui", 128, NULL, tskIDLE_PRIORITY, NULL);
@@ -106,13 +105,29 @@ void ao_ui_init(void)
 
 bool ao_ui_send_event(msg_event_t msg) {
 
-	BaseType_t status = xQueueSend(hao_hqueue, &msg, 0);
-	if (status != pdPASS) {
+	BaseType_t status =  pdFAIL;
+	msg_t* pmsg = (msg_t*)pvPortMalloc(sizeof(msg_t));
 
-		LOGGER_INFO("[UI] Cola llena: evento %d perdido", msg);
+	if(NULL != pmsg) {
+
+		LOGGER_INFO("[UI] memoria alocada: %d", sizeof(msg_t));
+		pmsg->size = sizeof(msg_t);
+		pmsg->msg_entregado = false;
+		pmsg->data = msg;
+		status = xQueueSend(hqueue, (void*)&pmsg, 0);
+
+		if(pdPASS == status) {
+
+			LOGGER_INFO("[UI] mensaje enviado");
+		} else {
+
+			LOGGER_INFO("[UI] mensaje no enviado");
+			vPortFree((void*)pmsg);
+			LOGGER_INFO("[UI] memoria liberada");
+		}
 	} else {
 
-		LOGGER_INFO("[UI] Evento enviado: %d", msg);
+		LOGGER_INFO("[BUTTON] memoria insuficiente");
 	}
 	return (status == pdPASS);
 }
