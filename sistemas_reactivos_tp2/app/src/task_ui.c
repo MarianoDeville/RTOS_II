@@ -57,6 +57,7 @@ static QueueHandle_t hao_hqueue;
 
 /********************** external data definition *****************************/
 ao_led_handle_t led_red, led_green, led_blue;
+extern QueueHandle_t hqueue;
 
 /********************** internal functions definition ************************/
 /********************** external functions definition ************************/
@@ -64,11 +65,11 @@ static void task_ui(void *argument) {
 
 	while (true) {
 
-		msg_event_t event_msg;
+		msg_t* pmsg;
 
-		if (pdPASS == xQueueReceive(hao_hqueue, &event_msg, portMAX_DELAY)) {
+		if (pdPASS == xQueueReceive(hqueue, (void*)&pmsg, portMAX_DELAY)) {
 
-			switch (event_msg) {
+			switch (pmsg->data) {
 
 				case MSG_EVENT_BUTTON_PULSE:
 					ao_led_init(&led_red, AO_LED_COLOR_RED);

@@ -149,8 +149,6 @@ void task_button(void* argument) {
 				LOGGER_INFO("[BUTTON] creo tarea UI");
 				ao_ui_init();
 
-ao_ui_send_event(pmsg->data);
-
 				if(pdPASS == xQueueSend(hqueue, (void*)&pmsg, 0)) {
 
 					LOGGER_INFO("[BUTTON] mensaje enviado");
