@@ -45,25 +45,25 @@ extern "C" {
 /********************** macros ***********************************************/
 
 /********************** typedef **********************************************/
-typedef enum
-{
+typedef enum {
+
   AO_LED_MESSAGE_ON,
   AO_LED_MESSAGE_OFF,
-//  AO_LED_MESSAGE_BLINK,
   AO_LED_MESSAGE__N,
 } ao_led_action_t;
 
-typedef enum
-{
+typedef enum {
+
   AO_LED_COLOR_RED,
   AO_LED_COLOR_GREEN,
   AO_LED_COLOR_BLUE,
 } ao_led_color;
 
-typedef struct
-{
+typedef struct {
+
     ao_led_color color;
     QueueHandle_t hqueue;
+    TaskHandle_t htask;
 } ao_led_handle_t;
 /********************** external data declaration ****************************/
 
@@ -71,7 +71,7 @@ typedef struct
 
 void ao_led_init(ao_led_handle_t* hao, ao_led_color color);
 bool ao_led_send(ao_led_handle_t* hao, ao_led_action_t* msg);
-
+void ao_led_kill(ao_led_handle_t* hao);
 /********************** End of CPP guard *************************************/
 #ifdef __cplusplus
 }

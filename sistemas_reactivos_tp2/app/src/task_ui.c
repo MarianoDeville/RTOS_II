@@ -59,7 +59,7 @@
 /********************** internal data definition *****************************/
 
 static QueueHandle_t hao_hqueue;
-
+static TaskHandle_t hao_htask_ui = NULL;
 /********************** external data definition *****************************/
 
 extern ao_led_handle_t led_red;
@@ -107,7 +107,8 @@ void ao_ui_init(void)
 	while(NULL == hao_hqueue) { }
 
 	BaseType_t status;
-	status = xTaskCreate(task_ui, "task_ao_ui", 128, NULL, tskIDLE_PRIORITY, NULL);
+//	status = xTaskCreate(task_ui, "task_ao_ui", 128, NULL, tskIDLE_PRIORITY, NULL);
+	status = xTaskCreate(task_ui, "task_ao_ui", 128, NULL, tskIDLE_PRIORITY, &hao_htask_ui);
 	while (pdPASS != status) { }
 }
 
@@ -122,6 +123,16 @@ bool ao_ui_send_event(msg_event_t msg) {
 		LOGGER_INFO("[UI] Evento enviado: %d", msg);
 	}
 	return (status == pdPASS);
+}
+
+void ao_ui_kill(void) {
+
+	if (hao_htask_ui != NULL) {
+
+		vTaskDelete(hao_htask_ui);
+		hao_htask_ui = NULL;
+		LOGGER_INFO("[UI] tarea eliminada");
+	}
 }
 
 /********************** end of file ******************************************/

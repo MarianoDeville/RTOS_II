@@ -104,7 +104,8 @@ void ao_led_init(ao_led_handle_t* hao, ao_led_color color) {
 	while(NULL == hao->hqueue) {/*error*/}
 
 	BaseType_t status;
-	status = xTaskCreate(task_led, "task_ao_led", 128, (void* const)hao, tskIDLE_PRIORITY, NULL);
+//	status = xTaskCreate(task_led, "task_ao_led", 128, (void* const)hao, tskIDLE_PRIORITY, NULL);
+	status = xTaskCreate(task_led, "task_ao_led", 128, (void*)hao, tskIDLE_PRIORITY, &hao->htask);
 	while (pdPASS != status) {/*error*/}
 }
 
@@ -121,5 +122,23 @@ bool ao_led_send(ao_led_handle_t* hao, ao_led_action_t* msg) {
 	    LOGGER_INFO("[LED] LED %d: mensaje enviado (id=%d)", hao->color, (int)&msg);
 	}
 	return (status == pdPASS);
+}
+
+void ao_led_kill(ao_led_handle_t* hao) {
+
+	if (hao->htask != NULL) {
+
+		vTaskDelete(hao->htask);
+		hao->htask = NULL;
+		LOGGER_INFO("[LED] Tarea eliminada: color=%d", hao->color);
+	}
+
+	if (hao->hqueue != NULL) {
+
+		vQueueDelete(hao->hqueue);
+		hao->hqueue = NULL;
+		LOGGER_INFO("[LED] Cola eliminada: color=%d", hao->color);
+	}
+	HAL_GPIO_WritePin(led_port_[hao->color], led_pin_[hao->color], LED_OFF);
 }
 /********************** end of file ******************************************/
