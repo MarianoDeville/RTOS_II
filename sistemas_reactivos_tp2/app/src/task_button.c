@@ -33,7 +33,6 @@
  */
 
 /********************** inclusions *******************************************/
-
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -47,7 +46,6 @@
 #include "task_ui.h"
 
 /********************** macros and definitions *******************************/
-
 #define TASK_PERIOD_MS_           (50)
 
 #define BUTTON_PERIOD_MS_         (TASK_PERIOD_MS_)
@@ -56,17 +54,12 @@
 #define BUTTON_LONG_TIMEOUT_      (2000)
 
 /********************** internal data declaration ****************************/
-
 /********************** internal functions declaration ***********************/
-
 /********************** internal data definition *****************************/
-
 /********************** external data definition *****************************/
-
 extern SemaphoreHandle_t hsem_button;
 
 /********************** internal functions definition ************************/
-
 typedef enum {
 
 	BUTTON_TYPE_NONE,
@@ -111,7 +104,6 @@ static button_type_t button_process_state_(bool value) {
 }
 
 /********************** external functions definition ************************/
-
 void task_button(void* argument) {
 
 	button_init_();
@@ -129,14 +121,17 @@ void task_button(void* argument) {
 			case BUTTON_TYPE_NONE:
 				break;
 			case BUTTON_TYPE_PULSE:
+				ao_ui_init();
 				LOGGER_INFO("button pulse");
 				ao_ui_send_event(MSG_EVENT_BUTTON_PULSE);
 				break;
 			case BUTTON_TYPE_SHORT:
+				ao_ui_init();
 				LOGGER_INFO("button short");
 				ao_ui_send_event(MSG_EVENT_BUTTON_SHORT);
 				break;
 			case BUTTON_TYPE_LONG:
+				ao_ui_init();
 				LOGGER_INFO("button long");
 				ao_ui_send_event(MSG_EVENT_BUTTON_LONG);
 				break;

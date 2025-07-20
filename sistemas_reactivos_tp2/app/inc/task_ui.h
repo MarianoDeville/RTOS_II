@@ -59,7 +59,7 @@ typedef enum {
 
 void ao_ui_init(void);
 bool ao_ui_send_event(msg_event_t msg);
-void ao_kill(void);
+void ao_delete(void);
 
 /********************** End of CPP guard *************************************/
 #ifdef __cplusplus

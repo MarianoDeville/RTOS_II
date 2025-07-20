@@ -33,7 +33,6 @@
  */
 
 /********************** inclusions *******************************************/
-
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -48,30 +47,20 @@
 #include "task_led.h"
 
 /********************** macros and definitions *******************************/
-
 #define QUEUE_LENGTH_            (1)
 #define QUEUE_ITEM_SIZE_         (sizeof(msg_event_t))
 
 /********************** internal data declaration ****************************/
-
 /********************** internal functions declaration ***********************/
-
 /********************** internal data definition *****************************/
-
 static QueueHandle_t hao_hqueue;
-static TaskHandle_t hao_htask_ui = NULL;
-/********************** external data definition *****************************/
 
-extern ao_led_handle_t led_red;
-extern ao_led_handle_t led_green;
-extern ao_led_handle_t led_blue;
+/********************** external data definition *****************************/
+ao_led_handle_t led_red, led_green, led_blue;
 
 /********************** internal functions definition ************************/
-
 /********************** external functions definition ************************/
-
-static void task_ui(void *argument)
-{
+static void task_ui(void *argument) {
 
 	while (true) {
 
@@ -82,14 +71,17 @@ static void task_ui(void *argument)
 			switch (event_msg) {
 
 				case MSG_EVENT_BUTTON_PULSE:
+					ao_led_init(&led_red, AO_LED_COLOR_RED);
 					LOGGER_INFO("[UI] led red %d", AO_LED_MESSAGE_ON);
 					ao_led_send(&led_red, AO_LED_MESSAGE_ON);
 					break;
 				case MSG_EVENT_BUTTON_SHORT:
+					ao_led_init(&led_green, AO_LED_COLOR_GREEN);
 					LOGGER_INFO("[UI] led green");
 					ao_led_send(&led_green, AO_LED_MESSAGE_ON);
 					break;
 				case MSG_EVENT_BUTTON_LONG:
+					ao_led_init(&led_blue, AO_LED_COLOR_BLUE);
 					LOGGER_INFO("[UI] led blue");
 					ao_led_send(&led_blue, AO_LED_MESSAGE_ON);
 					break;
@@ -107,8 +99,7 @@ void ao_ui_init(void)
 	while(NULL == hao_hqueue) { }
 
 	BaseType_t status;
-//	status = xTaskCreate(task_ui, "task_ao_ui", 128, NULL, tskIDLE_PRIORITY, NULL);
-	status = xTaskCreate(task_ui, "task_ao_ui", 128, NULL, tskIDLE_PRIORITY, &hao_htask_ui);
+	status = xTaskCreate(task_ui, "task_ao_ui", 128, NULL, tskIDLE_PRIORITY, NULL);
 	while (pdPASS != status) { }
 }
 
@@ -125,14 +116,10 @@ bool ao_ui_send_event(msg_event_t msg) {
 	return (status == pdPASS);
 }
 
-void ao_ui_kill(void) {
+void ao_ui_delete(void) {
 
-	if (hao_htask_ui != NULL) {
-
-		vTaskDelete(hao_htask_ui);
-		hao_htask_ui = NULL;
-		LOGGER_INFO("[UI] tarea eliminada");
-	}
+	  LOGGER_INFO("Elimino tarea ui");
+	  vTaskDelete(NULL);
 }
 
 /********************** end of file ******************************************/

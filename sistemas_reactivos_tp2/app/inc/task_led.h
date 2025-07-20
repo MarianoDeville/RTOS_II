@@ -63,7 +63,6 @@ typedef struct {
 
     ao_led_color color;
     QueueHandle_t hqueue;
-    TaskHandle_t htask;
 } ao_led_handle_t;
 /********************** external data declaration ****************************/
 
@@ -71,7 +70,7 @@ typedef struct {
 
 void ao_led_init(ao_led_handle_t* hao, ao_led_color color);
 bool ao_led_send(ao_led_handle_t* hao, ao_led_action_t* msg);
-void ao_led_kill(ao_led_handle_t* hao);
+void ao_led_delete(ao_led_handle_t* hao);
 /********************** End of CPP guard *************************************/
 #ifdef __cplusplus
 }

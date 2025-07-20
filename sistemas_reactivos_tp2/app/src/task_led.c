@@ -33,7 +33,6 @@
  */
 
 /********************** inclusions *******************************************/
-
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -47,7 +46,6 @@
 #include "task_led.h"
 
 /********************** macros and definitions *******************************/
-
 #define TASK_PERIOD_MS_			(1000)
 
 #define QUEUE_LED_LENGTH_		(1)
@@ -56,7 +54,6 @@
 /********************** internal data declaration ****************************/
 /********************** internal functions declaration ***********************/
 /********************** internal data definition *****************************/
-
 typedef enum {
 
 	LED_COLOR_NONE,
@@ -73,7 +70,6 @@ static uint16_t led_pin_[] = {LED_RED_PIN,  LED_GREEN_PIN, LED_BLUE_PIN };
 /********************** external data definition *****************************/
 /********************** internal functions definition ************************/
 /********************** external functions definition ************************/
-
 static void task_led(void *argument) {
 
 	ao_led_handle_t * hao = (ao_led_handle_t*)argument;
@@ -104,8 +100,7 @@ void ao_led_init(ao_led_handle_t* hao, ao_led_color color) {
 	while(NULL == hao->hqueue) {/*error*/}
 
 	BaseType_t status;
-//	status = xTaskCreate(task_led, "task_ao_led", 128, (void* const)hao, tskIDLE_PRIORITY, NULL);
-	status = xTaskCreate(task_led, "task_ao_led", 128, (void*)hao, tskIDLE_PRIORITY, &hao->htask);
+	status = xTaskCreate(task_led, "task_ao_led", 128, (void*)hao, tskIDLE_PRIORITY, NULL);
 	while (pdPASS != status) {/*error*/}
 }
 
@@ -124,14 +119,7 @@ bool ao_led_send(ao_led_handle_t* hao, ao_led_action_t* msg) {
 	return (status == pdPASS);
 }
 
-void ao_led_kill(ao_led_handle_t* hao) {
-
-	if (hao->htask != NULL) {
-
-		vTaskDelete(hao->htask);
-		hao->htask = NULL;
-		LOGGER_INFO("[LED] Tarea eliminada: color=%d", hao->color);
-	}
+void ao_led_delete(ao_led_handle_t* hao) {
 
 	if (hao->hqueue != NULL) {
 
@@ -139,6 +127,7 @@ void ao_led_kill(ao_led_handle_t* hao) {
 		hao->hqueue = NULL;
 		LOGGER_INFO("[LED] Cola eliminada: color=%d", hao->color);
 	}
-	HAL_GPIO_WritePin(led_port_[hao->color], led_pin_[hao->color], LED_OFF);
+	LOGGER_INFO("Elimino tarea led");
+	vTaskDelete(NULL);
 }
 /********************** end of file ******************************************/
