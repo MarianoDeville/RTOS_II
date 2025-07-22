@@ -41,12 +41,17 @@ extern "C" {
 #endif
 
 /********************** inclusions *******************************************/
+#include "task_ui.h"
 /********************** macros ***********************************************/
-/********************** typedef **********************************************/
-/********************** external data declaration ****************************/
-/********************** external functions declaration ***********************/
-void task_button(void* argument);
 
+/********************** typedef **********************************************/
+
+/********************** external data declaration ****************************/
+
+/********************** external functions declaration ***********************/
+
+void task_button(void* argument);
+void button_callback(msg_t* pmsg);
 /********************** End of CPP guard *************************************/
 #ifdef __cplusplus
 }

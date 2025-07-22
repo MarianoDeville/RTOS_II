@@ -43,21 +43,15 @@
 #include "logger.h"
 #include "dwt.h"
 
-#include "task_ui.h"
+#include "task_button.h"
 
 /********************** macros and definitions *******************************/
 #define TASK_PERIOD_MS_           (50)
-
-#define BUTTON_PERIOD_MS_         (TASK_PERIOD_MS_)
 #define BUTTON_PULSE_TIMEOUT_     (200)
 #define BUTTON_SHORT_TIMEOUT_     (1000)
 #define BUTTON_LONG_TIMEOUT_      (2000)
 
 /********************** internal data declaration ****************************/
-/********************** internal functions declaration ***********************/
-/********************** internal data definition *****************************/
-/********************** external data definition *****************************/
-/********************** internal functions definition ************************/
 typedef enum {
 
 	BUTTON_TYPE_NONE,
@@ -67,11 +61,14 @@ typedef enum {
 	BUTTON_TYPE__N,
 } button_type_t;
 
+/********************** internal data definition *****************************/
 static struct {
 
+	button_type_t estado;
     uint32_t counter;
 } button;
 
+/********************** internal functions definition ************************/
 static void button_init_(void) {
 
 	button.counter = 0;
@@ -83,7 +80,7 @@ static button_type_t button_process_state_(bool value) {
 
 	if(value) {
 
-		button.counter += BUTTON_PERIOD_MS_;
+		button.counter += TASK_PERIOD_MS_;
 	} else {
 
 		if(BUTTON_LONG_TIMEOUT_ <= button.counter) {
@@ -114,34 +111,37 @@ void task_button(void* argument) {
 		button_type_t button_type;
 		button_type = button_process_state_(button_state);
 
-		switch (button_type)
-		{
+		switch(button_type) {
+
 			case BUTTON_TYPE_NONE:
 				break;
 			case BUTTON_TYPE_PULSE:
-				LOGGER_INFO("[BUTTON] creo tarea UI");
-								ao_ui_init();
-				LOGGER_INFO("[BTN] pulso enviado");
+				ao_ui_init();
+				LOGGER_INFO("[BUTTON] pulso enviado");
 				ao_ui_send_event(MSG_EVENT_BUTTON_PULSE);
 				break;
 			case BUTTON_TYPE_SHORT:
-				LOGGER_INFO("[BUTTON] creo tarea UI");
-								ao_ui_init();
-				LOGGER_INFO("[BTN] corto enviado");
+				ao_ui_init();
+				LOGGER_INFO("[BUTTON] corto enviado");
 				ao_ui_send_event(MSG_EVENT_BUTTON_SHORT);
 				break;
 			case BUTTON_TYPE_LONG:
-				LOGGER_INFO("[BUTTON] creo tarea UI");
-								ao_ui_init();
-				LOGGER_INFO("[BTN] largo enviado");
+				ao_ui_init();
+				LOGGER_INFO("[BUTTON] largo enviado");
 				ao_ui_send_event(MSG_EVENT_BUTTON_LONG);
 				break;
 			default:
-				LOGGER_INFO("[BTN] error");
+				LOGGER_INFO("[BUTTON] error");
 				break;
 		}
 		vTaskDelay((TickType_t)(TASK_PERIOD_MS_ / portTICK_PERIOD_MS));
 	}
 }
 
+void button_callback(msg_t* pmsg) {
+
+	// cuando la UI termina de procesar, liberar la mem del msg
+	vPortFree((void*)pmsg);
+	LOGGER_INFO("[BUTTON] Callback: memoria liberada");
+}
 /********************** end of file ******************************************/
