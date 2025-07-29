@@ -43,6 +43,7 @@
 #include "logger.h"
 #include "dwt.h"
 
+#include "app.h"
 #include "task_led.h"
 #include "task_ui.h"
 
@@ -59,18 +60,17 @@ static void task_led(void *argument);
 static void ao_led_delete(ao_led_handle_t* hao);
 static void turnOnLed(ao_led_handle_t* hao);
 static void turnOffLed(ao_led_handle_t* hao);
-static void ao_led_init(ao_led_handle_t* hao, ao_led_color_t color) ;
 
 /********************** internal functions definition ************************/
 static void task_led(void *argument) {
 
 	ao_led_handle_t * hao = (ao_led_handle_t*)argument;
 
-	while (true) {
+	while(true) {
 
 		ao_led_message_t* pmsg;
 
-		if (pdPASS == xQueueReceive(hao->hqueue, (void*)&pmsg, portMAX_DELAY)) {
+		if(pdPASS == xQueueReceive(hao->hqueue, (void*)&pmsg, portMAX_DELAY)) {
 
 			if(AO_LED_MESSAGE_ON == pmsg->action)
 				turnOnLed(hao);
@@ -84,12 +84,13 @@ static void task_led(void *argument) {
 
 static void ao_led_delete(ao_led_handle_t* hao) {
 
-	if (hao->hqueue != NULL) {
+	if(hao->hqueue != NULL) {
 
 		vQueueDelete(hao->hqueue);
 		hao->hqueue = NULL;
+		LOGGER_INFO("[LED] Cola eliminada: color=%d", hao->color);
 	}
-	LOGGER_INFO("[LED] Elimina tarea led %d", hao->color);
+	LOGGER_INFO("[LED] Elimino tarea led color=%d", hao->color);
 	vTaskDelete(NULL);
 }
 
@@ -103,24 +104,25 @@ static void turnOffLed(ao_led_handle_t* hao) {
 	HAL_GPIO_WritePin(led_port_[hao->color], led_pin_[hao->color], LED_OFF);
 }
 
-static void ao_led_init(ao_led_handle_t* hao, ao_led_color_t color) {
+/********************** external functions definition ************************/
+void ao_led_init(ao_led_handle_t* hao, ao_led_color_t color) {
 
-	if (!hao->color) hao->color = color;
+	hao->color = color;
 
 	hao->hqueue = xQueueCreate(QUEUE_LED_LENGTH_, QUEUE_LED_ITEM_SIZE_);
-	while(NULL == hao->hqueue) {/*error*/}
 
-	LOGGER_INFO("[LED] Crea tarea led %d", hao->color);
+	if(NULL == hao->hqueue)
+		error_critico();
+
+	LOGGER_INFO("[LED] Cola de mensajes creada: color=%d, hqueue=%p", hao->color, (void *)hao->hqueue);
 	BaseType_t status;
 	status = xTaskCreate(task_led, "task_ao_led", 128, (void*)hao, tskIDLE_PRIORITY, NULL);
 
-	while(pdPASS != status) {/*error*/}
+	if(pdPASS != status)
+		error_critico();
 }
 
-/********************** external functions definition ************************/
 bool ao_led_send(ao_led_handle_t* hao, ao_led_action_t msg) {
-
-	ao_led_init(hao, hao->color); // inicializa y despues manda el msg
 
 	BaseType_t status =  pdFAIL;
 	ao_led_message_t* pmsg = (ao_led_message_t*)pvPortMalloc(sizeof(ao_led_message_t));
@@ -141,6 +143,7 @@ bool ao_led_send(ao_led_handle_t* hao, ao_led_action_t msg) {
 			LOGGER_INFO("[LED] memoria liberada");
 		}
 	} else {
+
         LOGGER_INFO("[LED] Memoria insuficiente");
     }
 	return (status == pdPASS);

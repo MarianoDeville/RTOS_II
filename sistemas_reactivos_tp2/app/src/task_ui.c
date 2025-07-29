@@ -43,7 +43,9 @@
 #include "logger.h"
 #include "dwt.h"
 
+#include "app.h"
 #include "task_ui.h"
+#include "task_led.h"
 #include "task_button.h"
 
 /********************** macros and definitions *******************************/
@@ -56,11 +58,10 @@ typedef enum {
 	UI_STATE_RED,
 	UI_STATE_GREEN,
 	UI_STATE_BLUE,
-	UI_STATE__N,
 } ui_state_t;
 
 /********************** internal data definition *****************************/
-static ui_state_t estado_ui = UI_STATE__N;
+static ui_state_t estado_ui = UI_STATE_STANDBY;
 static bool ui_running;
 static ao_led_handle_t led_red, led_green, led_blue;
 static QueueHandle_t hqueue;
@@ -72,25 +73,24 @@ static void ao_ui_delete(void);
 /********************** internal functions definition ************************/
 static void task_ui(void *argument) {
 
-	// predefino los colores
-	led_red.color = AO_LED_COLOR_RED;
-	led_green.color = AO_LED_COLOR_GREEN;
-	led_blue.color = AO_LED_COLOR_BLUE;
-
 	while(true) {
 
 		msg_t* pmsg;
 
 		if(pdPASS == xQueueReceive(hqueue, (void*)&pmsg, 1000)) {
 
+			ao_led_init(&led_red, AO_LED_COLOR_RED);
+			ao_led_init(&led_green, AO_LED_COLOR_GREEN);
+			ao_led_init(&led_blue, AO_LED_COLOR_BLUE);
+
 			switch(pmsg->data) {
 
 				case MSG_EVENT_BUTTON_PULSE:
 					if(UI_STATE_GREEN == estado_ui)
 						ao_led_send(&led_green, AO_LED_MESSAGE_OFF);
-					if(UI_STATE_BLUE == estado_ui)
+					else
 						ao_led_send(&led_blue, AO_LED_MESSAGE_OFF);
-					ao_led_send(&led_red,  AO_LED_MESSAGE_ON);
+					ao_led_send(&led_red, AO_LED_MESSAGE_ON);
 					estado_ui = UI_STATE_RED;
 					pmsg->process_cb(pmsg);
 					LOGGER_INFO("[UI] Estado RED");
@@ -98,7 +98,7 @@ static void task_ui(void *argument) {
 				case MSG_EVENT_BUTTON_SHORT:
 					if(UI_STATE_RED == estado_ui)
 						ao_led_send(&led_red, AO_LED_MESSAGE_OFF);
-					if(UI_STATE_BLUE == estado_ui)
+					else
 						ao_led_send(&led_blue, AO_LED_MESSAGE_OFF);
 					ao_led_send(&led_green, AO_LED_MESSAGE_ON);
 					estado_ui = UI_STATE_GREEN;
@@ -108,7 +108,7 @@ static void task_ui(void *argument) {
 				case MSG_EVENT_BUTTON_LONG:
 					if(UI_STATE_RED == estado_ui)
 						ao_led_send(&led_red, AO_LED_MESSAGE_OFF);
-					if(UI_STATE_GREEN == estado_ui)
+					else
 						ao_led_send(&led_green, AO_LED_MESSAGE_OFF);
 					ao_led_send(&led_blue, AO_LED_MESSAGE_ON);
 					estado_ui = UI_STATE_BLUE;
@@ -129,7 +129,7 @@ static void task_ui(void *argument) {
 
 static void ao_ui_delete(void) {
 
-	  LOGGER_INFO("[UI] Elimina tarea UI"); // se elimina en cualquier estado
+	  LOGGER_INFO("[UI] Elimino tarea ui"); // se elimina en cualquier estado
 	  ui_running = false;
 	  vTaskDelete(NULL);
 }
@@ -140,15 +140,18 @@ void ao_ui_init(void) {
 	// agrego logica para que se cree la tarea solo si no hay una corriendo
 	if(!ui_running) {
 
-		LOGGER_INFO("[UI] Crea tarea UI");
+		LOGGER_INFO("[UI] Se crea la tarea UI");
 		hqueue = xQueueCreate(QUEUE_LENGTH_, QUEUE_ITEM_SIZE_);
-		while(NULL == hqueue) {/*error*/}
-		
+
+		if(NULL == hqueue)
+			error_critico();
+
+		LOGGER_INFO("[UI] hqueue = %p", (void*)hqueue);
 		BaseType_t status;
 		status = xTaskCreate(task_ui, "task_ao_ui", 128, NULL, tskIDLE_PRIORITY, NULL);
 
-		while(pdPASS != status) {/*error*/}
-		if(estado_ui == UI_STATE__N) estado_ui = UI_STATE_STANDBY;
+		if(pdPASS != status)
+			error_critico();
 	}
 	ui_running = true;
 }
