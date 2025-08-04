@@ -5,25 +5,28 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../app/src/ao_led.c \
+../app/src/ao_ui.c \
 ../app/src/app.c \
 ../app/src/logger.c \
-../app/src/task_button.c \
-../app/src/task_led.c \
-../app/src/task_ui.c 
+../app/src/task_ao.c \
+../app/src/task_button.c 
 
 OBJS += \
+./app/src/ao_led.o \
+./app/src/ao_ui.o \
 ./app/src/app.o \
 ./app/src/logger.o \
-./app/src/task_button.o \
-./app/src/task_led.o \
-./app/src/task_ui.o 
+./app/src/task_ao.o \
+./app/src/task_button.o 
 
 C_DEPS += \
+./app/src/ao_led.d \
+./app/src/ao_ui.d \
 ./app/src/app.d \
 ./app/src/logger.d \
-./app/src/task_button.d \
-./app/src/task_led.d \
-./app/src/task_ui.d 
+./app/src/task_ao.d \
+./app/src/task_button.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -33,7 +36,7 @@ app/src/%.o app/src/%.su app/src/%.cyclo: ../app/src/%.c app/src/subdir.mk
 clean: clean-app-2f-src
 
 clean-app-2f-src:
-	-$(RM) ./app/src/app.cyclo ./app/src/app.d ./app/src/app.o ./app/src/app.su ./app/src/logger.cyclo ./app/src/logger.d ./app/src/logger.o ./app/src/logger.su ./app/src/task_button.cyclo ./app/src/task_button.d ./app/src/task_button.o ./app/src/task_button.su ./app/src/task_led.cyclo ./app/src/task_led.d ./app/src/task_led.o ./app/src/task_led.su ./app/src/task_ui.cyclo ./app/src/task_ui.d ./app/src/task_ui.o ./app/src/task_ui.su
+	-$(RM) ./app/src/ao_led.cyclo ./app/src/ao_led.d ./app/src/ao_led.o ./app/src/ao_led.su ./app/src/ao_ui.cyclo ./app/src/ao_ui.d ./app/src/ao_ui.o ./app/src/ao_ui.su ./app/src/app.cyclo ./app/src/app.d ./app/src/app.o ./app/src/app.su ./app/src/logger.cyclo ./app/src/logger.d ./app/src/logger.o ./app/src/logger.su ./app/src/task_ao.cyclo ./app/src/task_ao.d ./app/src/task_ao.o ./app/src/task_ao.su ./app/src/task_button.cyclo ./app/src/task_button.d ./app/src/task_button.o ./app/src/task_button.su
 
 .PHONY: clean-app-2f-src
 

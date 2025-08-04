@@ -32,31 +32,27 @@
  * @author : Sebastian Bedin <sebabedin@gmail.com>
  */
 
-#ifndef APP_H_
-#define APP_H_
-
-/********************** CPP guard ********************************************/
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /********************** inclusions *******************************************/
+#include "main.h"
+#include "cmsis_os.h"
+#include "logger.h"
+#include "dwt.h"
+#include "board.h"
 
-/********************** macros ***********************************************/
+#include "app.h"
+#include "task_button.h"
 
-/********************** typedef **********************************************/
+/********************** external functions definition ************************/
+void app_init(void) {
 
-/********************** external data declaration ****************************/
+	BaseType_t status;
 
-/********************** external functions declaration ***********************/
-void app_init(void);
-void error_critico(void);
+	status = xTaskCreate(task_button, "task_button", 128, NULL, tskIDLE_PRIORITY + 2, NULL);
 
-/********************** End of CPP guard *************************************/
-#ifdef __cplusplus
+	if(pdPASS != status)
+		while(1);
+	LOGGER_INFO("app init");
+	cycle_counter_init();
 }
-#endif
-
-#endif /* APP_H_ */
 
 /********************** end of file ******************************************/

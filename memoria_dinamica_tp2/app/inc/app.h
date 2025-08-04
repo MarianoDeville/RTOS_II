@@ -32,35 +32,30 @@
  * @author : Sebastian Bedin <sebabedin@gmail.com>
  */
 
+#ifndef APP_H_
+#define APP_H_
+
+/********************** CPP guard ********************************************/
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /********************** inclusions *******************************************/
-#include "main.h"
-#include "cmsis_os.h"
-#include "logger.h"
-#include "dwt.h"
-#include "board.h"
 
-#include "app.h"
-#include "task_button.h"
+/********************** macros ***********************************************/
 
-/********************** external functions definition ************************/
-void app_init(void) {
+/********************** typedef **********************************************/
 
-	BaseType_t status;
+/********************** external data declaration ****************************/
 
-	status = xTaskCreate(task_button, "task_button", 128, NULL, tskIDLE_PRIORITY, NULL);
-	if(pdPASS != status)
-		error_critico();
+/********************** external functions declaration ***********************/
+void app_init(void);
 
-	LOGGER_INFO("app init");
-	cycle_counter_init();
+/********************** End of CPP guard *************************************/
+#ifdef __cplusplus
 }
+#endif
 
-void error_critico(void) {
+#endif /* APP_H_ */
 
-	  __disable_irq();
-	  while(1) {
-
-		  HAL_GPIO_WritePin(LED_RED_PORT, LED_RED_PIN, LED_ON);
-	  }
-}
 /********************** end of file ******************************************/
