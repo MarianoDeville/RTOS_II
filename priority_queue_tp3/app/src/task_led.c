@@ -33,6 +33,7 @@
  */
 
 /********************** inclusions *******************************************/
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -43,85 +44,45 @@
 #include "logger.h"
 #include "dwt.h"
 
-#include "task_ao.h"
-#include "ao_ui.h"
-#include "ao_led.h"
+#include "task_led.h"
 
 /********************** macros and definitions *******************************/
-#define TASK_PERIOD_MS_           (50)
-#define NLEDS 3
 
-/********************** external data definition *****************************/
-volatile bool ao_running = false;
-ao_led_handle_t led_red, led_green, led_blue;
-
-/********************** internal data definition *****************************/
-static ao_led_handle_t * haos[NLEDS];
+/********************** internal data declaration ****************************/
 
 /********************** internal functions declaration ***********************/
-static void task_ao(void* argument);
-static void task_ao_delete(void);
+
+/********************** internal data definition *****************************/
+
+/********************** external data definition *****************************/
+
+extern QueueHandle_t hqueue;
 
 /********************** internal functions definition ************************/
-static void task_ao(void* argument) {
-
-	ao_led_init(&led_red, AO_LED_COLOR_RED);
-	ao_led_init(&led_green, AO_LED_COLOR_GREEN);
-	ao_led_init(&led_blue, AO_LED_COLOR_BLUE);
-    haos[0] = &led_red;
-    haos[1] = &led_green;
-    haos[2] = &led_blue;
-
-	while(ao_running) {
-
-		ao_ui_process();
-
-		for(uint8_t i = 0; i < NLEDS; i++) {
-
-			ao_led_process(haos[i]);
-		}
-
-		if(!ui_running_update()) {
-
-			task_ao_delete();
-		}
-		vTaskDelay((TickType_t)(TASK_PERIOD_MS_ / portTICK_PERIOD_MS));
-	}
-}
-
-static void task_ao_delete(void) {
-
-	LOGGER_INFO("[AO] Elimino tarea AO y cola UI"); // se elimina en cualquier estado
-	taskENTER_CRITICAL(); {		// seccion critica para que nadie mande mensajes mientras elimino
-
-		ao_ui_queue_delete();
-
-		for(uint8_t i = 0; i < NLEDS; i++) {
-
-			ao_led_delete_cola(haos[i]);
-		}
-	} taskEXIT_CRITICAL();
-	vTaskDelete(NULL);
-}
 
 /********************** external functions definition ************************/
-bool task_ao_init(void) {
 
-	// agrego logica para que se cree la tarea solo si no hay una corriendo
-	if(!ao_running) {
-
-		BaseType_t status;
-		status = xTaskCreate(task_ao, "task_ao", 128, NULL, tskIDLE_PRIORITY + 1, NULL);
-
-		if(pdPASS != status){
-			LOGGER_INFO("[UI] Error! Falla creación de tarea. Abortando init de AO.");
-			return false;				// salgo de ao_ui_init
-		}
-		ao_running = true;
-		LOGGER_INFO("[AO] Crea tarea AO");
-	}
-
-	return ao_ui_init();
+void task_led(void *argument)
+{
+  while (true)
+  {
+    led_message_t msg;
+    if (pdPASS == xQueueReceive(hqueue, &msg, portMAX_DELAY))
+    {
+      GPIO_PinState led_state;
+      if (LED_MESSAGE_ON == msg)
+      {
+        led_state = GPIO_PIN_SET;
+        LOGGER_INFO("led on");
+      }
+      else
+      {
+        led_state = GPIO_PIN_RESET;
+        LOGGER_INFO("led off");
+      }
+      HAL_GPIO_WritePin(LED_RED_PORT, LED_RED_PIN, led_state);
+    }
+  }
 }
 
 /********************** end of file ******************************************/
