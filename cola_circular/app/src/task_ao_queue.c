@@ -84,7 +84,7 @@ static cola_circular_t * recorrer_cola(uint8_t priority) {
 
 	while(actual != NULL || i > elementos_guardados) {
 
-		if(actual->priority >= priority)
+		if(actual->priority <= priority)
 			return actual;
 		actual = actual->proximo;
 		i++;
@@ -106,20 +106,27 @@ static void insertar(cola_circular_t * nuevo) {
 
 	if(NULL == proximo) {					// si no hay elementos de menor prioridad lo almaceno al final de la cola
 
-		nuevo->proximo = NULL;				// como es el útimo no hay elemento adelante
+		cola_circular_t* anterior = ultimo_elemento;
+		nuevo->proximo = NULL;				// como es el útimo no hay elemento siguiente
 		nuevo->anterior = ultimo_elemento;	// apunto desde el elemento agregado al que antes era el último elemento
+		anterior->proximo = nuevo;
 		ultimo_elemento = nuevo;			// dejo apuntado el ultimo elemento de la cola
+		return;
+	}
+
+	if(NULL == proximo->anterior) {			// lo almaceno al comienzo de la cola
+
+		nuevo->proximo = proximo;			// apunto al que antes era el primero
+		nuevo->anterior = NULL;				// como es el primero no hay elemento antes
+		proximo->anterior = nuevo;			// el que antes era primero ahora es segundo asi que apunto al nuevo primero como predecesor
+		elemento_salida = nuevo;			// es la nueva cabecera de la cola
 		return;
 	}
 	cola_circular_t* anterior = proximo->anterior;	// obtengo la direccion del elemento anterior en la cola
 	// meto en el medio la nueva estructura
 	nuevo->proximo = proximo;
-	proximo->anterior = nuevo;
 	nuevo->anterior = anterior;
-
-	if(NULL != anterior)
-		elemento_salida = nuevo;
-	else
-		anterior->proximo = nuevo;
+	proximo->anterior = nuevo;
+	anterior->proximo = nuevo;
 	return;
 }

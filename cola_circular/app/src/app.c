@@ -33,6 +33,8 @@
  */
 
 /********************** inclusions *******************************************/
+#include <stdio.h>
+
 #include "main.h"
 #include "app.h"
 #include "task_ao_queue.h"
@@ -40,9 +42,19 @@
 /********************** external functions definition ************************/
 void app_init(void) {
 
-	data_queue_t data = {0};
+	cola_ao_init(10);
 
-	encolar(data, 3);
+	data_queue_t data = {AO_LED_MESSAGE_ON,AO_LED_COLOR_RED};
+
+	uint8_t prioridad = 10;
+
+	while(1) {
+
+		if(prioridad == 8)
+			prioridad =25;
+		encolar(data, prioridad--);
+		HAL_Delay(250);
+	}
 }
 
 /********************** end of file ******************************************/

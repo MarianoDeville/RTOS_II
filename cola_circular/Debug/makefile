@@ -61,8 +61,8 @@ all: main-build
 main-build: cola_circular.elf secondary-outputs
 
 # Tool invocations
-cola_circular.elf cola_circular.map: $(OBJS) $(USER_OBJS) E:\Embebidos\STM32CubeIDE\cola_circular\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "cola_circular.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"E:\Embebidos\STM32CubeIDE\cola_circular\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="cola_circular.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+cola_circular.elf cola_circular.map: $(OBJS) $(USER_OBJS) E:\Embebidos\STM32CubeIDE\RTOS_II\cola_circular\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "cola_circular.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"E:\Embebidos\STM32CubeIDE\RTOS_II\cola_circular\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="cola_circular.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
