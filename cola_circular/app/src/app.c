@@ -54,7 +54,13 @@ void app_init(void) {
 			prioridad =25;
 		encolar(data, prioridad--);
 		HAL_Delay(250);
+		if(prioridad == 23)
+			break;
 	}
+	desencolar();
+	desencolar();
+	desencolar();
+	desencolar();
 }
 
 /********************** end of file ******************************************/

@@ -47,12 +47,10 @@ bool encolar(data_queue_t data, uint8_t priority) {
 
 	if(max_queue_size <= elementos_guardados) {		// elimino el último elemento de la cola para dejar luagar porque ya no queda espacio
 
-		cola_circular_t* ultimo = ultimo_elemento;	// cargo el último elemento
-		ultimo_elemento = ultimo->anterior;			// el puntero al último elemento ahora apunta al anteultimo
-		free(ultimo);								// libero la memoria del último (borrado)
-		ultimo = ultimo_elemento;					// ahora cargo el nuevo último elemento
-		ultimo->proximo = NULL;						// como ahora es el último no apunta a un siguiente
-		elementos_guardados--;						// bajo el contador indicando el lugar libre
+		ultimo_elemento = ultimo_elemento->anterior;	// el puntero al último elemento ahora apunta al anteultimo
+		free(ultimo_elemento->proximo);					// libero la memoria del último (borrado)
+		ultimo_elemento->proximo = NULL;				// como ahora es el último no apunta a un siguiente
+		elementos_guardados--;							// bajo el contador indicando el lugar libre
 	}
 	cola_circular_t* cola = (cola_circular_t*)malloc(sizeof(cola_circular_t));
 
@@ -67,12 +65,24 @@ bool encolar(data_queue_t data, uint8_t priority) {
 
 data_queue_t desencolar(void) {
 
-	cola_circular_t* cola = elemento_salida;	// obtengo el primer elemento de la cola
-	data_queue_t info = cola->data;				// obtengo la información de debo devolver
-	elemento_salida = cola->proximo;			// apunto el elemento de salida al proximo
-	free(cola);									// elimino el elemento
-	cola = elemento_salida;						// cargo el que ahora es el primer elemento de la cola
-	cola->anterior = NULL;						// como es el primero no hay anterior
+	data_queue_t info = {0};
+
+	if(NULL == elemento_salida)					// no hay nada en la cola
+		return info;
+	info = elemento_salida->data;				// obtengo la información de debo devolver
+
+	if(elemento_salida == ultimo_elemento) {	// es el último de la cola
+
+		free(elemento_salida);					// elimino el elemento
+		elementos_guardados = 0;				// reseteo todas las varibles
+		elemento_salida = NULL;
+		ultimo_elemento = NULL;
+		return info;							// devuelvo la información
+	}
+	elemento_salida = elemento_salida->proximo;	// apunto el elemento de salida al proximo
+	free(elemento_salida->anterior);			// elimino el elemento
+	elemento_salida->anterior = NULL;			// como es el primero no hay anterior
+	elementos_guardados--;
 	return info;								// devuelvo la información
 }
 
@@ -82,12 +92,11 @@ static cola_circular_t * recorrer_cola(uint8_t priority) {
 	cola_circular_t* actual = elemento_salida;
 	uint16_t i = 0;
 
-	while(actual != NULL || i > elementos_guardados) {
+	while(actual != NULL || elementos_guardados <= i++) {
 
 		if(actual->priority <= priority)
 			return actual;
 		actual = actual->proximo;
-		i++;
 	}
 	return NULL;
 }
@@ -104,17 +113,16 @@ static void insertar(cola_circular_t * nuevo) {
     }
 	cola_circular_t* proximo = recorrer_cola(nuevo->priority); // busco un lugar para guardar según la prioridad
 
-	if(NULL == proximo) {					// si no hay elementos de menor prioridad lo almaceno al final de la cola
-
-		cola_circular_t* anterior = ultimo_elemento;
+	if(NULL == proximo) {					// este es el caso que no hay elementos de menor prioridad, así que lo almaceno
+											// al final de la cola
 		nuevo->proximo = NULL;				// como es el útimo no hay elemento siguiente
 		nuevo->anterior = ultimo_elemento;	// apunto desde el elemento agregado al que antes era el último elemento
-		anterior->proximo = nuevo;
-		ultimo_elemento = nuevo;			// dejo apuntado el ultimo elemento de la cola
+		ultimo_elemento->proximo = nuevo;	// el que era el último elemento de la cola ahora apunta al nuevo último
+		ultimo_elemento = nuevo;			// cambio al nuevo último elemento de la cola
 		return;
 	}
 
-	if(NULL == proximo->anterior) {			// lo almaceno al comienzo de la cola
+	if(NULL == proximo->anterior) {			// este es el caso de que lo debo almacenar al comienzo de la cola
 
 		nuevo->proximo = proximo;			// apunto al que antes era el primero
 		nuevo->anterior = NULL;				// como es el primero no hay elemento antes
@@ -122,8 +130,8 @@ static void insertar(cola_circular_t * nuevo) {
 		elemento_salida = nuevo;			// es la nueva cabecera de la cola
 		return;
 	}
+	// por último cuando lo almaceno entre otros elementos
 	cola_circular_t* anterior = proximo->anterior;	// obtengo la direccion del elemento anterior en la cola
-	// meto en el medio la nueva estructura
 	nuevo->proximo = proximo;
 	nuevo->anterior = anterior;
 	proximo->anterior = nuevo;
