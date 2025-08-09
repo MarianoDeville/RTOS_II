@@ -44,19 +44,18 @@ void app_init(void) {
 
 	cola_ao_init(10);
 
-	data_queue_t data = {AO_LED_MESSAGE_ON,AO_LED_COLOR_RED};
+	data_queue_t data[5] = {AO_LED_MESSAGE_ON, AO_LED_COLOR_RED,
+							AO_LED_MESSAGE_OFF, AO_LED_COLOR_GREEN,
+							AO_LED_MESSAGE__N, AO_LED_COLOR_BLUE,
+							AO_LED_MESSAGE_ON, AO_LED_COLOR_GREEN,
+							AO_LED_MESSAGE_OFF, AO_LED_COLOR_RED};
 
-	uint8_t prioridad = 10;
+	encolar(data[0], 5);
+	encolar(data[1], 25);
+	encolar(data[2], 3);
+	encolar(data[3], 25);
+	encolar(data[4], 27);
 
-	while(1) {
-
-		if(prioridad == 8)
-			prioridad =25;
-		encolar(data, prioridad--);
-		HAL_Delay(250);
-		if(prioridad == 23)
-			break;
-	}
 	desencolar();
 	desencolar();
 	desencolar();
